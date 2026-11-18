@@ -1,5 +1,9 @@
 ## Rizumu v0.12.3
 
+### Penting
+
+- Versi 0.12.2 dan lebih lama masih memeriksa `kyrix/Rizumu`, jadi update otomatis belum tersambung. Install `Rizumu-0.12.3.apk` secara manual **sekali**; setelah itu pengecekan pembaruan memakai `fatkhur20/Rizumu`.
+
 ### Perbaikan
 
 - Update checker sekarang memakai repository publik `fatkhur20/Rizumu` sebagai default, bukan `kyrix/Rizumu`.

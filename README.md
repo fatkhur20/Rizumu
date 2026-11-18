@@ -60,7 +60,8 @@ RIZUMU_GITHUB_REPO=Rizumu
 ```
 
 Defaults are `fatkhur20/Rizumu`; change them before publishing so devices do not check the
-wrong repository. Release assets must end in `.apk`. If the release notes contain a
+wrong repository. Builds up to 0.12.2 still check `kyrix/Rizumu`, so install 0.12.3 manually
+once before relying on in-app updates. Release assets must end in `.apk`. If the release notes contain a
 `SHA-256:` line, the downloaded APK is verified before the installer opens.
 
 ## Offline and backup
