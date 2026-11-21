@@ -3,6 +3,7 @@ package com.rizumu.music.data.yt
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.rizumu.music.data.charts.RegionStore
 import org.schabi.newpipe.extractor.InfoItem
 import org.schabi.newpipe.extractor.ListExtractor
 import org.schabi.newpipe.extractor.ServiceList
@@ -15,7 +16,10 @@ import java.util.concurrent.ConcurrentHashMap
 
 open class YoutubeClient(
     private val service: StreamingService = ServiceList.YouTube,
-    private val musicSearch: MusicSearch = MusicSearch(),
+    private val localeProvider: () -> SearchLocale = {
+        SearchLocale.fromRegion(RegionStore.region.value)
+    },
+    private val musicSearch: MusicSearch = MusicSearch(localeProvider = localeProvider),
     private val io: CoroutineDispatcher = Dispatchers.IO,
 ) {
     private val resolvedCache = ConcurrentHashMap<String, CachedAudio>()
@@ -28,37 +32,25 @@ open class YoutubeClient(
     ): SearchPage = withContext(io) {
         require(query.isNotBlank()) { "query is blank" }
 
+        val locale = localeProvider()
         if (token?.page == null) {
-            if (filter == SearchFilter.ALL) {
-                val songs = runCatching {
-                    musicSearch.search(query, MusicSearchFilter.SONGS)
-                }.getOrNull()
-                val videos = runCatching {
-                    musicSearch.search(query, MusicSearchFilter.VIDEOS)
-                }.getOrNull()
-                val merged = mutableListOf<YoutubeTrack>()
-                val seen = HashSet<String>()
-                listOfNotNull(songs, videos).forEach { page ->
-                    page.items.forEach { track ->
-                        if (seen.add(track.videoId)) merged.add(track)
-                    }
-                }
-                if (merged.isNotEmpty()) {
-                    return@withContext SearchPage(
-                        items = SearchRanker.rank(merged, query),
-                        next = null,
-                    )
-                }
-            } else {
-                val innerTube = runCatching {
-                    musicSearch.search(query, filter.toMusicFilter(), token?.continuation)
-                }.getOrNull()
-                if (innerTube != null && innerTube.items.isNotEmpty()) {
-                    return@withContext SearchPage(
-                        items = SearchRanker.rank(innerTube.items, query),
-                        next = innerTube.continuation?.let { PageToken(it) },
-                    )
-                }
+            val regional = fetch(query, filter, locale, token?.continuation)
+            val ranked = SearchRanker.rank(regional.first, query)
+            val enough = locale == SearchLocale.global() ||
+                SearchRanker.countRelevant(regional.first, query) >= MIN_RELEVANT_RESULTS
+            if (regional.first.isNotEmpty() && enough) {
+                return@withContext SearchPage(
+                    items = ranked,
+                    next = regional.second?.let { PageToken(it) },
+                )
+            }
+            if (token?.continuation != null && regional.first.isEmpty()) {
+                return@withContext SearchPage(items = emptyList(), next = null)
+            }
+            val global = fetch(query, filter, SearchLocale.global())
+            val merged = SearchMerger.merge(ranked, SearchRanker.rank(global.first, query))
+            if (merged.isNotEmpty()) {
+                return@withContext SearchPage(items = merged, next = null)
             }
         }
 
@@ -69,7 +61,7 @@ open class YoutubeClient(
         }
         val extractor = service.getSearchExtractor(
             YoutubeSearchQueryHandlerFactory.getInstance()
-                .fromQuery(query.trim(), filters, ""),
+                .fromQuery(query.trim(), filters, locale.gl),
         )
 
         val page: ListExtractor.InfoItemsPage<InfoItem> = if (token == null) {
@@ -80,9 +72,30 @@ open class YoutubeClient(
         }
 
         SearchPage(
-            items = page.items.mapNotNull { it.toYoutubeTrack() },
+            items = SearchRanker.rank(page.items.mapNotNull { it.toYoutubeTrack() }, query),
             next = page.nextPageOrNull(),
         )
+    }
+
+    private suspend fun fetch(
+        query: String,
+        filter: String,
+        locale: SearchLocale,
+        continuation: String? = null,
+    ): Pair<List<YoutubeTrack>, String?> {
+        if (filter == SearchFilter.ALL) {
+            val songs = runCatching {
+                musicSearch.search(query, MusicSearchFilter.SONGS, locale = locale)
+            }.getOrNull()
+            val videos = runCatching {
+                musicSearch.search(query, MusicSearchFilter.VIDEOS, locale = locale)
+            }.getOrNull()
+            return SearchMerger.merge(songs?.items.orEmpty(), videos?.items.orEmpty()) to null
+        }
+        val page = runCatching {
+            musicSearch.search(query, filter.toMusicFilter(), continuation, locale)
+        }.getOrNull()
+        return (page?.items.orEmpty()) to page?.continuation
     }
 
     private fun String.toMusicFilter(): MusicSearchFilter = when (this) {
@@ -209,6 +222,7 @@ open class YoutubeClient(
     )
 
     companion object {
+        const val MIN_RELEVANT_RESULTS = 5
         private const val RESOLVE_TTL_MS = 45 * 60 * 1000L
         private const val MAX_CACHE_ENTRIES = 80
         private const val MAX_AUDIO_BITRATE = 160_000

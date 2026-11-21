@@ -34,15 +34,17 @@ class MusicSearch(
         .readTimeout(30, TimeUnit.SECONDS)
         .build(),
     private val clock: () -> Long = System::currentTimeMillis,
+    private val localeProvider: () -> SearchLocale = { SearchLocale.global() },
 ) {
 
     suspend fun search(
         query: String,
         filter: MusicSearchFilter,
         continuation: String? = null,
+        locale: SearchLocale? = null,
     ): MusicSearchPage = withContext(Dispatchers.IO) {
         val body = JSONObject().apply {
-            put("context", contextBody())
+            put("context", contextBody(locale ?: localeProvider()))
             if (continuation != null) {
                 put("continuation", continuation)
             } else {
@@ -53,15 +55,15 @@ class MusicSearch(
         MusicSearchParser.parse(post(body))
     }
 
-    private fun contextBody(): JSONObject {
+    internal fun contextBody(locale: SearchLocale): JSONObject {
         val version = "1." + SimpleDateFormat("yyyyMMdd", Locale.US).format(Date(clock())) + ".01.00"
         return JSONObject().put(
             "client",
             JSONObject().apply {
                 put("clientName", "WEB_REMIX")
                 put("clientVersion", version)
-                put("hl", "en")
-                put("gl", "ID")
+                put("hl", locale.hl)
+                put("gl", locale.gl)
             },
         )
     }

@@ -498,6 +498,11 @@ fun HomeScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 color = FtxTextMuted,
             )
+            Text(
+                text = "Berlaku juga untuk pencarian.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = FtxTextMuted,
+            )
             Spacer(Modifier.height(10.dp))
             LazyColumn(Modifier.fillMaxWidth().heightIn(max = 420.dp)) {
                 items(ChartRegion.SELECTABLE, key = { it.code }) { region ->

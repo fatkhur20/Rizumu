@@ -7,6 +7,7 @@ import com.rizumu.music.data.charts.ChartKind
 import com.rizumu.music.data.charts.ChartRegion
 import com.rizumu.music.data.charts.ChartRepository
 import com.rizumu.music.data.charts.ChartResult
+import com.rizumu.music.data.charts.RegionStore
 import com.rizumu.music.data.local.UserLibrary
 import com.rizumu.music.data.yt.YoutubeClient
 import com.rizumu.music.data.yt.YoutubeTrack
@@ -36,7 +37,7 @@ data class ChartUiState(
 )
 
 data class HomeUiState(
-    val region: ChartRegion = ChartRegion.INDONESIA,
+    val region: ChartRegion = RegionStore.region.value,
     val trending: ChartUiState = ChartUiState(loading = true),
     val global: ChartUiState = ChartUiState(loading = true),
     val recommended: HomeSection = HomeSection(),
@@ -70,6 +71,7 @@ class HomeViewModel(
 
     fun selectRegion(region: ChartRegion) {
         if (region.code == _state.value.region.code) return
+        RegionStore.select(region)
         _state.update { it.copy(region = region, trending = ChartUiState(loading = true)) }
         loadTrending()
     }

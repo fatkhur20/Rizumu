@@ -42,4 +42,14 @@ class SearchRankerTest {
 
         assertEquals(listOf(item), SearchRanker.rank(listOf(item), "romi"))
     }
+    @Test
+    fun `relevant count is exposed for fallback decision`() {
+        val items = listOf(
+            YoutubeTrack("1", "Romi Jahat", "Romi Jahat", 0L, null),
+            YoutubeTrack("2", "Lain", "Lain", 0L, null),
+        )
+
+        assertEquals(1, SearchRanker.countRelevant(items, "romi"))
+    }
+
 }

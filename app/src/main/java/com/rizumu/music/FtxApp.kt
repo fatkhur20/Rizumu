@@ -7,6 +7,7 @@ import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.rizumu.music.data.charts.ChartCache
 import com.rizumu.music.data.charts.ChartRepository
+import com.rizumu.music.data.charts.RegionStore
 import com.rizumu.music.data.local.UserLibrary
 import com.rizumu.music.data.local.download.DownloadStore
 import com.rizumu.music.data.local.playlist.PlaylistStore
@@ -55,6 +56,7 @@ class FtxApp : Application(), ImageLoaderFactory {
         PlaylistStore.init(this)
         DownloadStore.init(this)
         LyricsStore.init(this)
+        RegionStore.init(this)
         charts = ChartRepository(ChartCache(this))
         updates = UpdateRepository(this)
         NewPipe.init(FtxDownloader())
