@@ -18,8 +18,9 @@ v0.12.0 adds swipeable Home/Cari/Library pages, dock auto-return timing, and ref
 trending whenever the app opens. v0.12.1 fixes the dock auto-return timer and the Home
 Info sheet inside the pager; v0.12.2 also auto-returns after a manual dock drag to nav;
 v0.12.3 points the update checker at the public repository. v0.13.0 refreshes the
-launcher icon, removes search filter chips in favor of mixed results, neutralizes brand
-words in the UI, and adds playback retry/recovery.
+launcher icon, removes brand words from the UI, and adds playback retry/recovery.
+v0.13.1 restores neutral search filters (Semua/Terbaru/7 hari/30 hari) with relevance
+ranking and mixed audio+video results.
 The package id and signing key intentionally remain unchanged so existing installs keep
 their Disukai, Riwayat, Playlist, and download data.
 

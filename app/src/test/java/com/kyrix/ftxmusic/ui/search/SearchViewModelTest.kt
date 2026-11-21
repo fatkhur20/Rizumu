@@ -1,6 +1,7 @@
 package com.kyrix.ftxmusic.ui.search
 
 import com.kyrix.ftxmusic.data.yt.PageToken
+import com.kyrix.ftxmusic.data.yt.SearchFilter
 import com.kyrix.ftxmusic.data.yt.SearchPage
 import com.kyrix.ftxmusic.data.yt.YoutubeClient
 import kotlinx.coroutines.Dispatchers
@@ -157,4 +158,14 @@ class SearchViewModelTest {
         assertTrue(viewModel.state.value.results.isEmpty())
         assertFalse(viewModel.state.value.hasSearched)
     }
+    @Test
+    fun `filter change re-searches with selected filter`() {
+        val (viewModel, client) = viewModel(initialQuery = "lagu pop")
+
+        viewModel.onFilterChange(SearchFilter.WEEK)
+
+        assertEquals(SearchFilter.WEEK, viewModel.state.value.filter)
+        assertEquals(SearchFilter.WEEK, client.filters.last())
+    }
+
 }

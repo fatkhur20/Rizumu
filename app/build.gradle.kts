@@ -26,8 +26,8 @@ android {
         applicationId = "com.kyrix.ftxmusic"
         minSdk = 26
         targetSdk = 34
-        versionCode = 32
-        versionName = "0.13.0"
+        versionCode = 33
+        versionName = "0.13.1"
 
         buildConfigField("String", "GITHUB_OWNER", "\"$githubOwner\"")
         buildConfigField("String", "GITHUB_REPO", "\"$githubRepo\"")

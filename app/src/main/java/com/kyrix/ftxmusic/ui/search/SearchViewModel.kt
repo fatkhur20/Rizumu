@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kyrix.ftxmusic.data.local.UserLibrary
 import com.kyrix.ftxmusic.data.yt.PageToken
+import com.kyrix.ftxmusic.data.yt.SearchFilter
 import com.kyrix.ftxmusic.data.yt.YoutubeClient
 import com.kyrix.ftxmusic.data.yt.YoutubeTrack
 import kotlinx.coroutines.CancellationException
@@ -16,12 +17,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.schabi.newpipe.extractor.exceptions.SignInConfirmNotBotException
 
-const val FILTER_ALL = ""
+const val FILTER_ALL = SearchFilter.ALL
 
 data class SearchUiState(
     val queryText: String = "",
     val activeGenre: String? = null,
-    val filter: String = FILTER_ALL,
+    val filter: String = SearchFilter.ALL,
     val results: List<YoutubeTrack> = emptyList(),
     val isLoading: Boolean = false,
     val isLoadingMore: Boolean = false,
@@ -54,7 +55,7 @@ class SearchViewModel(
     private var loadMoreJob: Job? = null
     private var nextToken: PageToken? = null
     private var activeQuery: String = initialQuery
-    private var activeFilter: String = FILTER_ALL
+    private var activeFilter: String = SearchFilter.ALL
 
     init {
         if (initialGenre.isNotBlank()) {

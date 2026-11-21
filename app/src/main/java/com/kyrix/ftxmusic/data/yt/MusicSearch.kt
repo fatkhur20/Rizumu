@@ -14,7 +14,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
 
-enum class MusicSearchFilter { ALL, SONGS, VIDEOS }
+enum class MusicSearchFilter { ALL, SONGS, VIDEOS, RECENT, WEEK, MONTH }
 
 data class MusicSearchPage(
     val items: List<YoutubeTrack>,
@@ -97,6 +97,9 @@ class MusicSearch(
         internal fun paramsFor(filter: MusicSearchFilter): String? = when (filter) {
             MusicSearchFilter.SONGS -> PARAM_SONGS
             MusicSearchFilter.VIDEOS -> PARAM_VIDEOS
+            MusicSearchFilter.RECENT -> SearchFilter.RECENT
+            MusicSearchFilter.WEEK -> SearchFilter.WEEK
+            MusicSearchFilter.MONTH -> SearchFilter.MONTH
             MusicSearchFilter.ALL -> null
         }
     }

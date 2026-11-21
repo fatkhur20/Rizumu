@@ -29,21 +29,44 @@ open class YoutubeClient(
         require(query.isNotBlank()) { "query is blank" }
 
         if (token?.page == null) {
-            val innerTube = runCatching {
-                musicSearch.search(query, filter.toMusicFilter(), token?.continuation)
-            }.getOrNull()
-            if (innerTube != null && innerTube.items.isNotEmpty()) {
-                return@withContext SearchPage(
-                    items = innerTube.items,
-                    next = innerTube.continuation?.let { PageToken(it) },
-                )
-            }
-            if (innerTube != null && token?.continuation != null) {
-                return@withContext SearchPage(items = emptyList(), next = null)
+            if (filter == SearchFilter.ALL) {
+                val songs = runCatching {
+                    musicSearch.search(query, MusicSearchFilter.SONGS)
+                }.getOrNull()
+                val videos = runCatching {
+                    musicSearch.search(query, MusicSearchFilter.VIDEOS)
+                }.getOrNull()
+                val merged = mutableListOf<YoutubeTrack>()
+                val seen = HashSet<String>()
+                listOfNotNull(songs, videos).forEach { page ->
+                    page.items.forEach { track ->
+                        if (seen.add(track.videoId)) merged.add(track)
+                    }
+                }
+                if (merged.isNotEmpty()) {
+                    return@withContext SearchPage(
+                        items = SearchRanker.rank(merged, query),
+                        next = null,
+                    )
+                }
+            } else {
+                val innerTube = runCatching {
+                    musicSearch.search(query, filter.toMusicFilter(), token?.continuation)
+                }.getOrNull()
+                if (innerTube != null && innerTube.items.isNotEmpty()) {
+                    return@withContext SearchPage(
+                        items = SearchRanker.rank(innerTube.items, query),
+                        next = innerTube.continuation?.let { PageToken(it) },
+                    )
+                }
             }
         }
 
-        val filters = if (filter.isBlank()) emptyList() else listOf(filter)
+        val filters = when (filter) {
+            YoutubeSearchQueryHandlerFactory.MUSIC_SONGS,
+            YoutubeSearchQueryHandlerFactory.MUSIC_VIDEOS -> listOf(filter)
+            else -> emptyList()
+        }
         val extractor = service.getSearchExtractor(
             YoutubeSearchQueryHandlerFactory.getInstance()
                 .fromQuery(query.trim(), filters, ""),
@@ -65,6 +88,9 @@ open class YoutubeClient(
     private fun String.toMusicFilter(): MusicSearchFilter = when (this) {
         YoutubeSearchQueryHandlerFactory.MUSIC_SONGS -> MusicSearchFilter.SONGS
         YoutubeSearchQueryHandlerFactory.MUSIC_VIDEOS -> MusicSearchFilter.VIDEOS
+        SearchFilter.RECENT -> MusicSearchFilter.RECENT
+        SearchFilter.WEEK -> MusicSearchFilter.WEEK
+        SearchFilter.MONTH -> MusicSearchFilter.MONTH
         else -> MusicSearchFilter.ALL
     }
 

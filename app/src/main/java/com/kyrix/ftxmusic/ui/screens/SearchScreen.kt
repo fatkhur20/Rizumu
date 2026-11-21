@@ -28,6 +28,8 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,6 +59,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kyrix.ftxmusic.data.local.UserLibrary
+import com.kyrix.ftxmusic.data.yt.SearchFilter
 import com.kyrix.ftxmusic.data.yt.YoutubeTrack
 import com.kyrix.ftxmusic.playback.PlaybackManager
 import com.kyrix.ftxmusic.ui.components.BouncyEntrance
@@ -213,6 +216,23 @@ fun SearchScreen(
                 cursorColor = FtxAccent,
             ),
         )
+        }
+
+        Spacer(Modifier.height(10.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            SearchFilterChip("Semua", state.filter == SearchFilter.ALL) {
+                viewModel.onFilterChange(SearchFilter.ALL)
+            }
+            SearchFilterChip("Terbaru", state.filter == SearchFilter.RECENT) {
+                viewModel.onFilterChange(SearchFilter.RECENT)
+            }
+            SearchFilterChip("7 hari", state.filter == SearchFilter.WEEK) {
+                viewModel.onFilterChange(SearchFilter.WEEK)
+            }
+            SearchFilterChip("30 hari", state.filter == SearchFilter.MONTH) {
+                viewModel.onFilterChange(SearchFilter.MONTH)
+            }
         }
 
         Spacer(Modifier.height(6.dp))
@@ -519,6 +539,28 @@ private fun SuggestionChip(
             Text(text = query, style = MaterialTheme.typography.labelLarge)
         }
     }
+}
+
+@Composable
+private fun SearchFilterChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label) },
+        shape = RoundedCornerShape(FtxRadius.pill),
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = Color.White.copy(alpha = 0.18f),
+            selectedLabelColor = FtxText,
+            containerColor = Color.White.copy(alpha = 0.08f),
+            labelColor = FtxTextMuted,
+        ),
+        border = FilterChipDefaults.filterChipBorder(
+            enabled = true,
+            selected = selected,
+            borderColor = Color.White.copy(alpha = 0.14f),
+            selectedBorderColor = Color.White.copy(alpha = 0.35f),
+        ),
+    )
 }
 
 @Composable
