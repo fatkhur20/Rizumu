@@ -26,4 +26,16 @@ class LiveExtractionTest {
         assertTrue(audio.url.startsWith("http"), "audio url is not http")
         assertTrue(audio.durationSec > 0, "duration was not extracted")
     }
+
+    @Test
+    fun singleWordChannelLookup() = runBlocking {
+        assumeTrue("set FTX_LIVE=1 to run live network tests", System.getenv("FTX_LIVE") == "1")
+        NewPipe.init(FtxDownloader())
+
+        val page = YoutubeClient().search("romi", SearchFilter.ALL)
+        println("matched channel: ${page.matchedChannel?.name}")
+        println("items: ${page.items.size}")
+        assertTrue(page.items.isNotEmpty())
+    }
+
 }

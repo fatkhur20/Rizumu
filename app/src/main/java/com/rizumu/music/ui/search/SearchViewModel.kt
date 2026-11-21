@@ -3,6 +3,7 @@ package com.rizumu.music.ui.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rizumu.music.data.local.UserLibrary
+import com.rizumu.music.data.yt.ChannelHit
 import com.rizumu.music.data.yt.PageToken
 import com.rizumu.music.data.yt.SearchFilter
 import com.rizumu.music.data.yt.YoutubeClient
@@ -30,6 +31,7 @@ data class SearchUiState(
     val error: String? = null,
     val hasSearched: Boolean = false,
     val activeQuery: String = "",
+    val matchedChannel: ChannelHit? = null,
 )
 
 class SearchViewModel(
@@ -82,6 +84,7 @@ class SearchViewModel(
                     hasMore = false,
                     error = null,
                     hasSearched = false,
+                    matchedChannel = null,
                 )
             }
             return
@@ -130,6 +133,7 @@ class SearchViewModel(
                 hasMore = false,
                 error = null,
                 hasSearched = false,
+                matchedChannel = null,
             )
         }
     }
@@ -168,6 +172,7 @@ class SearchViewModel(
                     results = emptyList(),
                     hasMore = false,
                     hasSearched = true,
+                    matchedChannel = null,
                 )
             }
             try {
@@ -179,6 +184,7 @@ class SearchViewModel(
                         isLoading = false,
                         results = page.items,
                         hasMore = page.next != null,
+                        matchedChannel = page.matchedChannel,
                     )
                 }
             } catch (cancelled: CancellationException) {
