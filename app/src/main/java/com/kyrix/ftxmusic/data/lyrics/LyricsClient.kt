@@ -75,7 +75,7 @@ class LyricsClient(
         val request = Request.Builder()
             .url(url)
             .header("Accept", "application/json")
-            .header("User-Agent", "Rizumu/${BuildConfig.VERSION_NAME} (personal Android music player)")
+            .header("User-Agent", "Rizumu/${BuildConfig.VERSION_NAME} (personal Android player)")
             .build()
 
         val body = try {

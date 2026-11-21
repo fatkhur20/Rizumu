@@ -72,12 +72,8 @@ open class YoutubeClient(
         cachedAudio(videoId)?.let { return@withContext it }
 
         val lock = locks.computeIfAbsent(videoId) { Any() }
-        try {
-            synchronized(lock) {
-                cachedAudio(videoId) ?: extractAudio(videoId).also { storeAudio(videoId, it) }
-            }
-        } finally {
-            locks.remove(videoId, lock)
+        synchronized(lock) {
+            cachedAudio(videoId) ?: extractAudio(videoId).also { storeAudio(videoId, it) }
         }
     }
 
@@ -157,8 +153,13 @@ open class YoutubeClient(
             )
         }
 
+    fun invalidate(videoId: String) {
+        if (videoId.isNotBlank()) resolvedCache.remove(videoId)
+    }
+
     fun clearUrlCache() {
         resolvedCache.clear()
+        locks.clear()
     }
 
     private fun InfoItem.toYoutubeTrack(): YoutubeTrack? {

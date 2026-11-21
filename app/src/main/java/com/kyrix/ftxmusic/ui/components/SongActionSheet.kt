@@ -442,7 +442,7 @@ private fun TrackHeader(track: YoutubeTrack) {
 }
 
 private fun shareTrack(context: android.content.Context, track: YoutubeTrack) {
-    val url = "https://music.youtube.com/watch?v=${track.videoId}"
+    val url = "https://youtu.be/${track.videoId}"
     val text = buildString {
         append(track.title)
         if (track.artist.isNotBlank()) append(" — ").append(track.artist)

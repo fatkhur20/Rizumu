@@ -77,13 +77,13 @@ class ChartRepository(
                     ChartKind.MUSIC_VIDEOS -> ChartParser.selectDailyMusicVideos(playlists)
                 } ?: throw ChartException(
                     when (kind) {
-                        ChartKind.SONGS -> "YouTube Music tidak menyediakan tangga lagu untuk wilayah ini."
-                        ChartKind.MUSIC_VIDEOS -> "YouTube Music tidak menyediakan tangga lagu video untuk wilayah ini."
+                        ChartKind.SONGS -> "Sumber tidak menyediakan tangga lagu untuk wilayah ini."
+                        ChartKind.MUSIC_VIDEOS -> "Sumber tidak menyediakan tangga lagu untuk wilayah ini."
                     },
                 )
                 val snapshot = fetchPlaylist(playlist, region.code, kind, fetchedAt, boundedLimit)
                 if (snapshot.entries.isEmpty()) {
-                    throw ChartException("Tangga lagu dari YouTube Music sedang kosong.")
+                    throw ChartException("Tangga lagu sedang kosong.")
                 }
                 cache.write(snapshot)
                 ChartResult(snapshot, fromCache = false)
@@ -114,7 +114,7 @@ class ChartRepository(
         val json = post(body)
         val playlists = ChartParser.parseChartPlaylists(json)
         if (playlists.isEmpty()) {
-            throw ChartException("Struktur tangga lagu YouTube Music tidak dikenali.")
+            throw ChartException("Struktur tangga lagu tidak dikenali.")
         }
         return playlists
     }
@@ -174,12 +174,12 @@ class ChartRepository(
             val text = response.body?.string().orEmpty()
             if (!response.isSuccessful) {
                 throw when (response.code) {
-                    429 -> ChartException("Terlalu banyak permintaan ke YouTube Music. Coba lagi nanti.")
-                    403 -> ChartException("YouTube Music menolak permintaan tangga lagu dari jaringan ini.")
-                    else -> ChartException("YouTube Music mengembalikan HTTP ${response.code}.")
+                    429 -> ChartException("Terlalu banyak permintaan ke sumber data. Coba lagi nanti.")
+                    403 -> ChartException("Sumber menolak permintaan tangga lagu dari jaringan ini.")
+                    else -> ChartException("Sumber mengembalikan HTTP ${response.code}.")
                 }
             }
-            if (text.isBlank()) throw ChartException("Tangga lagu YouTube Music tidak mengembalikan data.")
+            if (text.isBlank()) throw ChartException("Tangga lagu tidak mengembalikan data.")
             text
         }
     }
@@ -191,7 +191,7 @@ class ChartRepository(
             cause = cause.cause
         }
         return when (error) {
-            is IOException -> "Tidak bisa menghubungi YouTube Music. Periksa koneksi."
+            is IOException -> "Tidak bisa menghubungi sumber data. Periksa koneksi."
             else -> error.message ?: DEFAULT_ERROR
         }
     }

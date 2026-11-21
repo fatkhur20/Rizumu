@@ -536,12 +536,19 @@ fun NowPlayingScreen(
                         shape = RoundedCornerShape(12.dp),
                         color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.9f),
                     ) {
-                        Text(
-                            text = state.error,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onErrorContainer,
-                            modifier = Modifier.padding(12.dp),
-                        )
+                        Column(Modifier.padding(12.dp)) {
+                            Text(
+                                text = state.error,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                            )
+                            TextButton(onClick = playback::retryCurrent) {
+                                Text(
+                                    text = "Coba lagi",
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                )
+                            }
+                        }
                     }
                     Spacer(Modifier.height(10.dp))
                 }
@@ -809,7 +816,7 @@ fun NowPlayingScreen(
                             playback = playback,
                             seed = listOf(state.artist, state.title)
                                 .firstOrNull { it.isNotBlank() }
-                                ?: "Musik populer Indonesia",
+                                ?: "Lagu populer Indonesia",
                             excludeId = state.mediaId,
                         )
                     }

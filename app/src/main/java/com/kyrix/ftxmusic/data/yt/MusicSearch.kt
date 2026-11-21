@@ -81,8 +81,8 @@ class MusicSearch(
 
         http.newCall(request).execute().use { response ->
             val text = response.body?.string().orEmpty()
-            if (!response.isSuccessful) throw IOException("YouTube Music search HTTP ${response.code}")
-            if (text.isBlank()) throw IOException("YouTube Music search returned no data")
+            if (!response.isSuccessful) throw IOException("Pencarian gagal (HTTP ${response.code})")
+            if (text.isBlank()) throw IOException("Pencarian mengembalikan data kosong")
             return text
         }
     }
@@ -105,6 +105,7 @@ class MusicSearch(
 object MusicSearchParser {
 
     private val DURATION = Regex("^\\d{1,3}:\\d{2}$")
+    private val VIDEO_ID = Regex("^[A-Za-z0-9_-]{11}$")
     private val GOOGLE_SIZE = Regex("=w\\d+-h\\d+")
 
     fun parse(raw: String): MusicSearchPage {
@@ -139,9 +140,9 @@ object MusicSearchParser {
         val title = columnText(columns, 0) ?: return null
         if (title.isBlank()) return null
 
-        val videoId = row.optJSONObject("playlistItemData")?.optString("videoId")
-            ?.takeIf { it.isNotBlank() }
-            ?: watchVideoId(row)
+        val videoId = (row.optJSONObject("playlistItemData")?.optString("videoId")
+            ?: watchVideoId(row))
+            ?.takeIf { VIDEO_ID.matches(it) }
             ?: return null
 
         val subtitleRuns = columnRuns(columns, 1)

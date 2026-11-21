@@ -23,9 +23,11 @@ class SearchViewModelTest {
 
     private class RecordingYoutubeClient : YoutubeClient() {
         val queries = mutableListOf<String>()
+        val filters = mutableListOf<String>()
 
         override suspend fun search(query: String, filter: String, token: PageToken?): SearchPage {
             queries += query
+            filters += filter
             throw IllegalStateException("offline test")
         }
     }
@@ -48,44 +50,46 @@ class SearchViewModelTest {
     fun `Pop quick action keeps input empty and uses the search term`() {
         val (viewModel, client) = viewModel()
 
-        viewModel.openCategory("Pop", "musik pop")
+        viewModel.openCategory("Pop", "lagu pop")
 
         assertEquals("", viewModel.state.value.queryText)
         assertEquals("Pop", viewModel.state.value.activeGenre)
-        assertEquals(listOf("musik pop"), client.queries)
+        assertEquals(listOf("lagu pop"), client.queries)
+        assertEquals(listOf(FILTER_ALL), client.filters)
+        assertEquals(FILTER_ALL, viewModel.state.value.filter)
     }
 
     @Test
     fun `new release quick action keeps input empty`() {
         val (viewModel, client) = viewModel()
 
-        viewModel.openCategory("Rilis Baru", "rilis musik baru")
+        viewModel.openCategory("Rilis Baru", "rilis baru")
 
         assertEquals("", viewModel.state.value.queryText)
         assertEquals("Rilis Baru", viewModel.state.value.activeGenre)
-        assertEquals(listOf("rilis musik baru"), client.queries)
+        assertEquals(listOf("rilis baru"), client.queries)
     }
 
     @Test
     fun `acoustic quick action keeps input empty`() {
         val (viewModel, client) = viewModel()
 
-        viewModel.openCategory("Akustik", "musik akustik")
+        viewModel.openCategory("Akustik", "lagu akustik")
 
         assertEquals("", viewModel.state.value.queryText)
         assertEquals("Akustik", viewModel.state.value.activeGenre)
-        assertEquals(listOf("musik akustik"), client.queries)
+        assertEquals(listOf("lagu akustik"), client.queries)
     }
 
     @Test
     fun `focus quick action keeps input empty`() {
         val (viewModel, client) = viewModel()
 
-        viewModel.openCategory("Fokus", "musik fokus")
+        viewModel.openCategory("Fokus", "lagu fokus")
 
         assertEquals("", viewModel.state.value.queryText)
         assertEquals("Fokus", viewModel.state.value.activeGenre)
-        assertEquals(listOf("musik fokus"), client.queries)
+        assertEquals(listOf("lagu fokus"), client.queries)
     }
 
     @Test
@@ -103,11 +107,11 @@ class SearchViewModelTest {
     fun `search idea keeps input empty`() {
         val (viewModel, client) = viewModel()
 
-        viewModel.openCategory("Musik galau")
+        viewModel.openCategory("Lagu galau")
 
         assertEquals("", viewModel.state.value.queryText)
-        assertEquals("Musik galau", viewModel.state.value.activeGenre)
-        assertEquals(listOf("Musik galau"), client.queries)
+        assertEquals("Lagu galau", viewModel.state.value.activeGenre)
+        assertEquals(listOf("Lagu galau"), client.queries)
     }
 
     @Test
@@ -123,11 +127,11 @@ class SearchViewModelTest {
 
     @Test
     fun `initial category route uses q for search and genre for header`() {
-        val (viewModel, client) = viewModel(initialQuery = "musik pop", initialGenre = "Pop")
+        val (viewModel, client) = viewModel(initialQuery = "lagu pop", initialGenre = "Pop")
 
         assertEquals("", viewModel.state.value.queryText)
         assertEquals("Pop", viewModel.state.value.activeGenre)
-        assertEquals(listOf("musik pop"), client.queries)
+        assertEquals(listOf("lagu pop"), client.queries)
     }
 
     @Test

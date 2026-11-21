@@ -229,7 +229,7 @@ fun LibraryScreen(
                     icon = Icons.Rounded.Download,
                     title = "Belum ada unduhan",
                     message = "Buka menu sebuah lagu lalu pilih Unduh offline.",
-                    actionLabel = "Cari musik",
+                    actionLabel = "Cari lagu",
                     onAction = { onOpenSearch("") },
                 )
             } else {
@@ -311,7 +311,7 @@ fun LibraryScreen(
                 } else {
                     "Lagu yang kamu putar akan muncul di sini."
                 },
-                actionLabel = "Cari musik",
+                actionLabel = "Cari lagu",
                 onAction = { onOpenSearch("") },
             )
         } else {

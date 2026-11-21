@@ -15,14 +15,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.schabi.newpipe.extractor.exceptions.SignInConfirmNotBotException
-import org.schabi.newpipe.extractor.services.youtube.linkHandler.YoutubeSearchQueryHandlerFactory
 
 const val FILTER_ALL = ""
 
 data class SearchUiState(
     val queryText: String = "",
     val activeGenre: String? = null,
-    val filter: String = YoutubeSearchQueryHandlerFactory.MUSIC_SONGS,
+    val filter: String = FILTER_ALL,
     val results: List<YoutubeTrack> = emptyList(),
     val isLoading: Boolean = false,
     val isLoadingMore: Boolean = false,
@@ -55,7 +54,7 @@ class SearchViewModel(
     private var loadMoreJob: Job? = null
     private var nextToken: PageToken? = null
     private var activeQuery: String = initialQuery
-    private var activeFilter: String = YoutubeSearchQueryHandlerFactory.MUSIC_SONGS
+    private var activeFilter: String = FILTER_ALL
 
     init {
         if (initialGenre.isNotBlank()) {
@@ -226,10 +225,10 @@ class SearchViewModel(
         var cause: Throwable? = error
         while (cause != null) {
             if (cause is SignInConfirmNotBotException) {
-                return "YouTube memblokir pencarian dari jaringan ini. Coba jaringan lain."
+                return "Layanan memblokir pencarian dari jaringan ini. Coba jaringan lain."
             }
             cause = cause.cause
         }
-        return error.message ?: "Tidak bisa menghubungi YouTube. Coba lagi."
+        return error.message ?: "Tidak bisa memuat hasil. Coba lagi."
     }
 }

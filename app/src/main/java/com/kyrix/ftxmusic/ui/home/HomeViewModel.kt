@@ -212,7 +212,7 @@ class HomeViewModel(
         var cause: Throwable? = error
         while (cause != null) {
             if (cause is SignInConfirmNotBotException) {
-                return "YouTube memblokir permintaan dari jaringan ini."
+                return "Layanan memblokir permintaan dari jaringan ini."
             }
             cause = cause.cause
         }
@@ -222,6 +222,6 @@ class HomeViewModel(
     private companion object {
         const val CHART_LIMIT = 20
         const val AUTO_REFRESH_THROTTLE_MS = 5_000L
-        const val DEFAULT_CHART_ERROR = "Tidak bisa memuat tangga lagu YouTube Music."
+        const val DEFAULT_CHART_ERROR = "Tidak bisa memuat tangga lagu."
     }
 }

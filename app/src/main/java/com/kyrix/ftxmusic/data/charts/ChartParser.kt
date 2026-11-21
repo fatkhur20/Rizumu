@@ -7,7 +7,7 @@ data class ChartPlaylist(val title: String, val browseId: String)
 
 object ChartParser {
 
-    const val SOURCE = "YouTube Music Charts"
+    const val SOURCE = "Tangga lagu"
 
     fun parseChartPlaylists(json: String): List<ChartPlaylist> {
         val root = JSONObject(json)

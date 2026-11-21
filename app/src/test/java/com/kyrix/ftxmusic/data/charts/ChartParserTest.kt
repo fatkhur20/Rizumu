@@ -222,7 +222,7 @@ class ChartParserTest {
         assertEquals("abc123", track.videoId)
         assertEquals(200L, track.durationSec)
         assertEquals(3, entry.rank)
-        assertTrue(entry.source.contains("YouTube Music Charts"))
+        assertTrue(entry.source.contains("Tangga lagu"))
         assertFalse(entry.source.isBlank())
     }
 }

@@ -167,6 +167,7 @@ class MusicSearchParserTest {
     @Test
     fun `filter params are the verified innertube values`() {
         assertEquals("EgWKAQIIAWoKEAkQBRAKEAMQBA%3D%3D", MusicSearch.paramsFor(MusicSearchFilter.SONGS))
+        assertEquals(null, MusicSearch.paramsFor(MusicSearchFilter.ALL))
         assertEquals("EgWKAQIQAWoKEAkQChAFEAMQBA%3D%3D", MusicSearch.paramsFor(MusicSearchFilter.VIDEOS))
         assertNull(MusicSearch.paramsFor(MusicSearchFilter.ALL))
     }

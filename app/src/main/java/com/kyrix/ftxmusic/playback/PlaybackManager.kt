@@ -34,7 +34,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.runBlocking
-import org.schabi.newpipe.extractor.exceptions.SignInConfirmNotBotException
+import kotlinx.coroutines.withTimeout
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 
@@ -124,18 +124,29 @@ class PlaybackManager(context: Context) {
         .setSessionActivity(sessionActivity())
         .build()
 
+    private var retryAttempts = 0
+
     private val listener = object : Player.Listener {
         override fun onEvents(player: Player, events: Player.Events) {
             refreshState()
         }
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            retryAttempts = 0
             _state.update { it.copy(error = null) }
             prefetchNext()
         }
 
         override fun onPlayerError(error: PlaybackException) {
-            _state.update { it.copy(error = friendlyError(error)) }
+            if (PlaybackErrorPolicy.shouldRetry(retryAttempts)) {
+                retryAttempts++
+                _state.update { it.copy(error = null) }
+                youtube.invalidate(player.currentMediaItem?.mediaId.orEmpty())
+                player.prepare()
+                player.playWhenReady = true
+            } else {
+                _state.update { it.copy(error = PlaybackErrorPolicy.friendlyError(error)) }
+            }
         }
     }
 
@@ -161,6 +172,7 @@ class PlaybackManager(context: Context) {
 
     fun playTracks(tracks: List<YoutubeTrack>, startIndex: Int) {
         if (tracks.isEmpty()) return
+        retryAttempts = 0
         _state.update { it.copy(error = null) }
         val items = tracks.map { it.toMediaItem() }
         player.setMediaItems(items, startIndex.coerceIn(0, items.lastIndex), 0L)
@@ -326,7 +338,7 @@ class PlaybackManager(context: Context) {
             return dataSpec.withUri(Uri.fromFile(local))
         }
         return try {
-            val resolved = runBlocking { youtube.resolveAudio(videoId) }
+            val resolved = runBlocking { withTimeout(30_000L) { youtube.resolveAudio(videoId) } }
             dataSpec.withUri(Uri.parse(resolved.url))
         } catch (error: Exception) {
             throw IOException("Gagal menyiapkan audio ($videoId)", error)
@@ -360,16 +372,12 @@ class PlaybackManager(context: Context) {
         )
     }
 
-    private fun friendlyError(error: PlaybackException): String {
-        var cause: Throwable? = error
-        while (cause != null) {
-            if (cause is SignInConfirmNotBotException) {
-                return "YouTube memblokir permintaan dari jaringan ini. Coba jaringan lain, " +
-                    "atau gunakan akun/cookie YouTube di pengaturan nanti."
-            }
-            cause = cause.cause
-        }
-        return "Gagal memutar lagu. Coba lagu lain atau ulangi sebentar lagi."
+    fun retryCurrent() {
+        retryAttempts = 0
+        _state.update { it.copy(error = null) }
+        youtube.invalidate(player.currentMediaItem?.mediaId.orEmpty())
+        player.prepare()
+        player.playWhenReady = true
     }
 
     companion object {

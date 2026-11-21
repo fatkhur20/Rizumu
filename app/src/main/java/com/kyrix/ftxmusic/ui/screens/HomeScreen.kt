@@ -102,10 +102,10 @@ import java.util.Locale
 private data class QuickAction(val label: String, val icon: ImageVector, val query: String)
 
 private val QUICK_ACTIONS = listOf(
-    QuickAction("Pop", Icons.Rounded.MusicNote, "musik pop"),
-    QuickAction("Rilis Baru", Icons.Rounded.FiberNew, "rilis musik baru"),
-    QuickAction("Akustik", Icons.Rounded.Piano, "musik akustik"),
-    QuickAction("Fokus", Icons.Rounded.Headphones, "musik fokus"),
+    QuickAction("Pop", Icons.Rounded.MusicNote, "lagu pop"),
+    QuickAction("Rilis Baru", Icons.Rounded.FiberNew, "rilis baru"),
+    QuickAction("Akustik", Icons.Rounded.Piano, "lagu akustik"),
+    QuickAction("Fokus", Icons.Rounded.Headphones, "lagu fokus"),
 )
 
 private val GENRES = listOf(
@@ -287,7 +287,7 @@ fun HomeScreen(
                 ui.trending.entries.isEmpty() -> {
                     EmptyState(
                         title = "Tangga lagu kosong",
-                        message = "YouTube Music tidak menyediakan tangga lagu untuk wilayah ini.",
+                        message = "Sumber tidak menyediakan tangga lagu untuk wilayah ini.",
                         actionLabel = "Pilih wilayah",
                         onAction = { showRegionPicker = true },
                     )
@@ -326,10 +326,10 @@ fun HomeScreen(
         item {
             Spacer(Modifier.height(22.dp))
             SectionHeader(
-                title = "Video Musik Global",
+                title = "Tangga Global",
                 modifier = Modifier.padding(horizontal = 18.dp),
                 actionIcon = Icons.Rounded.Refresh,
-                actionDescription = "Perbarui tangga lagu video",
+                actionDescription = "Perbarui tangga lagu",
                 onAction = viewModel::refreshGlobal,
             )
             Spacer(Modifier.height(4.dp))
@@ -365,7 +365,7 @@ fun HomeScreen(
                 }
                 ui.global.entries.isEmpty() -> {
                     Text(
-                        text = "Tangga lagu video global sedang kosong.",
+                        text = "Tangga lagu global sedang kosong.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = FtxTextMuted,
                         modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
@@ -466,7 +466,7 @@ fun HomeScreen(
         item {
             Spacer(Modifier.height(26.dp))
             Text(
-                text = "Musik dari YouTube untuk penggunaan pribadi.",
+                text = "Untuk penggunaan pribadi.",
                 style = MaterialTheme.typography.labelMedium,
                 color = FtxTextMuted,
                 modifier = Modifier.padding(horizontal = 18.dp),
@@ -494,7 +494,7 @@ fun HomeScreen(
                 style = MaterialTheme.typography.titleLarge,
             )
             Text(
-                text = "Sumber resmi: YouTube Music Charts",
+                text = "Sumber: tangga lagu eksternal.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = FtxTextMuted,
             )
@@ -561,14 +561,14 @@ fun HomeScreen(
                 )
                 Spacer(Modifier.height(14.dp))
                 Text(
-                    text = "Musik diputar dari YouTube. Gunakan untuk keperluan pribadi; " +
-                        "streaming di luar aplikasi resmi dapat melanggar Ketentuan Layanan YouTube.",
+                    text = "Sumber audio dan data: YouTube. Gunakan untuk keperluan pribadi; " +
+                        "streaming di luar aplikasi resmi dapat melanggar ketentuan layanan sumber.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = FtxTextMuted,
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "Tangga lagu berasal dari YouTube Music Charts. " +
+                    text = "Tangga lagu berasal dari sumber eksternal. " +
                         "Peringkat ditampilkan sesuai urutan sumber; data disimpan sementara " +
                         "dan dapat ditampilkan dari cache saat offline.",
                     style = MaterialTheme.typography.bodyMedium,
@@ -833,7 +833,7 @@ private fun chartStatusText(
     fetchedAt: Long?,
     source: String?,
 ): String {
-    val label = source?.takeIf { it.isNotBlank() } ?: "YouTube Music Charts"
+    val label = source?.takeIf { it.isNotBlank() } ?: "Tangga lagu"
     val prefix = if (cached) "Cache · $label" else label
     val time = fetchedAt?.let {
         SimpleDateFormat("d MMM, HH.mm", Locale.forLanguageTag("id-ID")).format(Date(it))

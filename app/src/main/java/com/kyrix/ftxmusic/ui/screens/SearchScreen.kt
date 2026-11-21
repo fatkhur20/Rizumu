@@ -28,8 +28,6 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -71,14 +69,12 @@ import com.kyrix.ftxmusic.ui.components.SkeletonTrackRow
 import com.kyrix.ftxmusic.ui.components.bouncyClick
 import com.kyrix.ftxmusic.ui.components.TrackRow
 import com.kyrix.ftxmusic.ui.components.SongActionSheet
-import com.kyrix.ftxmusic.ui.search.FILTER_ALL
 import com.kyrix.ftxmusic.ui.search.SearchViewModel
 import com.kyrix.ftxmusic.ui.theme.FtxAccent
 import com.kyrix.ftxmusic.ui.theme.FtxRadius
 import com.kyrix.ftxmusic.ui.theme.FtxText
 import com.kyrix.ftxmusic.ui.theme.FtxTextMuted
 import kotlinx.coroutines.flow.distinctUntilChanged
-import org.schabi.newpipe.extractor.services.youtube.linkHandler.YoutubeSearchQueryHandlerFactory as Filters
 
 private val SUGGESTED_QUERIES = listOf(
     "Lofi",
@@ -104,7 +100,7 @@ private val SEARCH_IDEAS = listOf(
     "K-Pop",
     "Indie Indonesia",
     "Cover akustik",
-    "Musik galau",
+    "Lagu galau",
     "Dangdut koplo",
 )
 
@@ -217,20 +213,6 @@ fun SearchScreen(
                 cursorColor = FtxAccent,
             ),
         )
-        }
-
-        Spacer(Modifier.height(10.dp))
-
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            SearchFilterChip("Semua", state.filter == FILTER_ALL) {
-                viewModel.onFilterChange(FILTER_ALL)
-            }
-            SearchFilterChip("Lagu", state.filter == Filters.MUSIC_SONGS) {
-                viewModel.onFilterChange(Filters.MUSIC_SONGS)
-            }
-            SearchFilterChip("Video", state.filter == Filters.MUSIC_VIDEOS) {
-                viewModel.onFilterChange(Filters.MUSIC_VIDEOS)
-            }
         }
 
         Spacer(Modifier.height(6.dp))
@@ -537,28 +519,6 @@ private fun SuggestionChip(
             Text(text = query, style = MaterialTheme.typography.labelLarge)
         }
     }
-}
-
-@Composable
-private fun SearchFilterChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    FilterChip(
-        selected = selected,
-        onClick = onClick,
-        label = { Text(label) },
-        shape = RoundedCornerShape(FtxRadius.pill),
-        colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = Color.White.copy(alpha = 0.18f),
-            selectedLabelColor = FtxText,
-            containerColor = Color.White.copy(alpha = 0.08f),
-            labelColor = FtxTextMuted,
-        ),
-        border = FilterChipDefaults.filterChipBorder(
-            enabled = true,
-            selected = selected,
-            borderColor = Color.White.copy(alpha = 0.14f),
-            selectedBorderColor = Color.White.copy(alpha = 0.35f),
-        ),
-    )
 }
 
 @Composable
