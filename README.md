@@ -20,9 +20,11 @@ Info sheet inside the pager; v0.12.2 also auto-returns after a manual dock drag 
 v0.12.3 points the update checker at the public repository. v0.13.0 refreshes the
 launcher icon, removes brand words from the UI, and adds playback retry/recovery.
 v0.13.1 restores neutral search filters (Semua/Terbaru/7 hari/30 hari) with relevance
-ranking and mixed audio+video results.
-The package id and signing key intentionally remain unchanged so existing installs keep
-their Disukai, Riwayat, Playlist, and download data.
+ranking and mixed audio+video results. v0.14.0 moves the app identity to
+`com.rizumu.music` and restores the media notification with external transport controls.
+
+As of v0.14.0 the package id is `com.rizumu.music`. Older `com.kyrix.ftxmusic` installs
+are a separate app and their private data is not migrated; uninstall the old app manually.
 
 - R1: Rizumu identity, launcher icon, update checker, Equalizer empty state — done
 - R2: playlist mosaic/reorder, sleep timer, MediaStyle/lock screen — done
@@ -79,4 +81,4 @@ files and download records. Import merges data instead of wiping the current lib
 
 `keystore.properties` and `*.jks` are gitignored. The release keystore must be kept safe;
 without it, future updates cannot be installed over the current app. Do not change the
-application id (`com.kyrix.ftxmusic`) or the signing key after release.
+application id (`com.rizumu.music`) or the signing key after this release.

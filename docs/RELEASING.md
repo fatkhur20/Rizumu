@@ -1,7 +1,8 @@
 # Rizumu release procedure
 
 1. Pick the next version and update **both** `versionCode` and `versionName` in
-   `app/build.gradle.kts`. Never change `applicationId` or the signing key.
+   `app/build.gradle.kts`. Never change `applicationId` (`com.rizumu.music`) or the
+   signing key after v0.14.0.
 2. Confirm the update-checker repository. Defaults live in `app/build.gradle.kts`
    (`fatkhur20/Rizumu`); override with `RIZUMU_GITHUB_OWNER` / `RIZUMU_GITHUB_REPO` in
    `gradle.properties` or `~/.gradle/gradle.properties` when needed.

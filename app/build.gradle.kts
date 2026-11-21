@@ -19,15 +19,15 @@ val githubOwner = providers.gradleProperty("RIZUMU_GITHUB_OWNER").getOrElse("fat
 val githubRepo = providers.gradleProperty("RIZUMU_GITHUB_REPO").getOrElse("Rizumu")
 
 android {
-    namespace = "com.kyrix.ftxmusic"
+    namespace = "com.rizumu.music"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.kyrix.ftxmusic"
+        applicationId = "com.rizumu.music"
         minSdk = 26
         targetSdk = 34
-        versionCode = 33
-        versionName = "0.13.1"
+        versionCode = 34
+        versionName = "0.14.0"
 
         buildConfigField("String", "GITHUB_OWNER", "\"$githubOwner\"")
         buildConfigField("String", "GITHUB_REPO", "\"$githubRepo\"")
