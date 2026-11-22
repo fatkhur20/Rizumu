@@ -304,16 +304,6 @@ fun SearchScreen(
                                 bottom = 24.dp + bottomContentPadding,
                             ),
                         ) {
-                            state.matchedChannel?.let { channel ->
-                                item(key = "channel-${channel.url}") {
-                                    Text(
-                                        text = "Dari channel: ${channel.name}",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = FtxAccent,
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 8.dp),
-                                    )
-                                }
-                            }
                             itemsIndexed(
                                 items = state.results,
                                 key = { index, track -> "${track.videoId}-$index" },

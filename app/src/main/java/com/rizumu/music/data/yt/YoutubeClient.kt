@@ -5,9 +5,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.rizumu.music.data.charts.RegionStore
 import org.schabi.newpipe.extractor.InfoItem
-import org.schabi.newpipe.extractor.channel.ChannelInfo
-import org.schabi.newpipe.extractor.channel.ChannelInfoItem
-import org.schabi.newpipe.extractor.channel.tabs.ChannelTabs
 import org.schabi.newpipe.extractor.ListExtractor
 import org.schabi.newpipe.extractor.ServiceList
 import org.schabi.newpipe.extractor.StreamingService
@@ -15,7 +12,6 @@ import org.schabi.newpipe.extractor.stream.DeliveryMethod
 import org.schabi.newpipe.extractor.services.youtube.linkHandler.YoutubeSearchQueryHandlerFactory
 import org.schabi.newpipe.extractor.stream.AudioStream
 import org.schabi.newpipe.extractor.stream.StreamInfoItem
-import org.schabi.newpipe.extractor.stream.StreamType
 import java.util.concurrent.ConcurrentHashMap
 
 open class YoutubeClient(
@@ -38,8 +34,6 @@ open class YoutubeClient(
 
         val locale = localeProvider()
         val trimmed = query.trim()
-        val mayUseChannel = trimmed.none(Char::isWhitespace) &&
-            filter == SearchFilter.ALL && token == null
         var page: SearchPage? = null
 
         if (token?.page == null) {
@@ -80,55 +74,7 @@ open class YoutubeClient(
             )
         }
 
-        if (mayUseChannel) {
-            runCatching { discoverChannel(trimmed, locale) }.getOrNull()?.let { discovery ->
-                if (discovery.second.isNotEmpty()) {
-                    page = SearchPage(
-                        items = SearchMerger.merge(discovery.second, page!!.items),
-                        next = page!!.next,
-                        matchedChannel = discovery.first,
-                    )
-                }
-            }
-        }
-
         page!!
-    }
-
-    private fun discoverChannel(
-        query: String,
-        locale: SearchLocale,
-    ): Pair<ChannelHit, List<YoutubeTrack>>? {
-        val queryHandler = YoutubeSearchQueryHandlerFactory.getInstance()
-            .fromQuery(query, listOf(YoutubeSearchQueryHandlerFactory.CHANNELS), locale.gl)
-        val extractor = service.getSearchExtractor(queryHandler)
-        extractor.fetchPage()
-        val candidates = extractor.initialPage.items.filterIsInstance<ChannelInfoItem>().map {
-            ChannelHit(
-                name = it.name.orEmpty(),
-                url = it.url.orEmpty(),
-                subscriberCount = it.subscriberCount,
-                verified = it.isVerified,
-            )
-        }
-        val selected = ChannelMatcher.select(query, candidates) ?: return null
-        if (selected.url.isBlank()) return null
-
-        val info = ChannelInfo.getInfo(service, selected.url)
-        val tab = service.getChannelTabExtractorFromId(info.id, ChannelTabs.VIDEOS)
-        tab.fetchPage()
-        val uploads = tab.initialPage.items.filterIsInstance<StreamInfoItem>()
-            .filter { !it.isShortFormContent && it.streamType != StreamType.LIVE_STREAM }
-            .mapNotNull { it.toYoutubeTrack() }
-            .take(CHANNEL_UPLOAD_LIMIT)
-        if (uploads.isEmpty()) return null
-
-        val hit = selected.copy(
-            name = info.name.orEmpty().ifBlank { selected.name },
-            subscriberCount = if (info.subscriberCount >= 0) info.subscriberCount else selected.subscriberCount,
-            verified = selected.verified || info.isVerified,
-        )
-        return hit to uploads
     }
 
     private suspend fun fetch(
@@ -277,7 +223,6 @@ open class YoutubeClient(
 
     companion object {
         const val MIN_RELEVANT_RESULTS = 5
-        const val CHANNEL_UPLOAD_LIMIT = 8
         private const val RESOLVE_TTL_MS = 45 * 60 * 1000L
         private const val MAX_CACHE_ENTRIES = 80
         private const val MAX_AUDIO_BITRATE = 160_000

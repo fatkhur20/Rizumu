@@ -22,4 +22,12 @@ class SearchMergerTest {
 
         assertEquals(listOf("a", "b", "c"), merged.map { it.videoId })
     }
+    @Test
+    fun `same title and artist is not duplicated`() {
+        val first = YoutubeTrack("id1", "Film Murahan", "Romi Jahat", 0L, null)
+        val second = YoutubeTrack("id2", "film murahan", "ROMI JAHAT", 0L, null)
+
+        assertEquals(listOf(first), SearchMerger.merge(listOf(first), listOf(second)))
+    }
+
 }

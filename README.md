@@ -23,8 +23,8 @@ v0.13.1 restores neutral search filters (Semua/Terbaru/7 hari/30 hari) with rele
 ranking and mixed audio+video results. v0.14.0 moves the app identity to
 `com.rizumu.music` and restores the media notification with external transport controls.
 v0.14.1 uses the selected region for search, with global fallback, and keeps playback alive
-when the app is removed from recent apps. v0.14.2 adds channel-first results for single-word
-queries.
+when the app is removed from recent apps. v0.14.3 focuses results on matching artists instead of channel uploads and removes
+duplicates.
 
 As of v0.14.0 the package id is `com.rizumu.music`. Older `com.kyrix.ftxmusic` installs
 are a separate app and their private data is not migrated; uninstall the old app manually.

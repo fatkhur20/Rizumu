@@ -33,7 +33,7 @@ class SearchRankerTest {
 
         val ranked = SearchRanker.rank(items, "romi")
 
-        assertEquals(listOf("a", "b", "c"), ranked.map { it.videoId })
+        assertEquals(listOf("b", "a", "c"), ranked.map { it.videoId })
     }
 
     @Test
@@ -50,6 +50,28 @@ class SearchRankerTest {
         )
 
         assertEquals(1, SearchRanker.countRelevant(items, "romi"))
+    }
+
+    @Test
+    fun `matching artist is prioritized over title-only matches`() {
+        val titleOnly = YoutubeTrack("1", "Romi Cover", "Penyanyi Lain", 0L, null)
+        val artistOne = YoutubeTrack("2", "Satu Satu", "Romi Jahat", 0L, null)
+        val artistTwo = YoutubeTrack("3", "Argata", "Romi Jahat", 0L, null)
+
+        val ranked = SearchRanker.rank(listOf(titleOnly, artistOne, artistTwo), "romi")
+
+        assertEquals(listOf("2", "3", "1"), ranked.map { it.videoId })
+    }
+
+    @Test
+    fun `top artist is detected from results`() {
+        val items = listOf(
+            YoutubeTrack("1", "Satu Satu", "Romi Jahat", 0L, null),
+            YoutubeTrack("2", "Argata", "Romi Jahat", 0L, null),
+            YoutubeTrack("3", "Romi Cover", "Lain", 0L, null),
+        )
+
+        assertEquals("romi jahat", SearchRanker.topArtist(items, "romi"))
     }
 
 }

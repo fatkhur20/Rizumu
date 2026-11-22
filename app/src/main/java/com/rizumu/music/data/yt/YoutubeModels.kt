@@ -10,17 +10,9 @@ data class YoutubeTrack(
     val thumbnailUrl: String?,
 )
 
-data class ChannelHit(
-    val name: String,
-    val url: String,
-    val subscriberCount: Long,
-    val verified: Boolean,
-)
-
 data class SearchPage(
     val items: List<YoutubeTrack>,
     val next: PageToken?,
-    val matchedChannel: ChannelHit? = null,
 )
 
 class PageToken internal constructor(
