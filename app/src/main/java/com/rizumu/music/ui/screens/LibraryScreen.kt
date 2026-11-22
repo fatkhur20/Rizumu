@@ -175,24 +175,41 @@ fun LibraryScreen(
 
             Spacer(Modifier.height(12.dp))
 
-            val topArtist = ListeningStatsLogic.topArtists(library.stats, 1).firstOrNull()
+            val topArtists = ListeningStatsLogic.topArtists(library.stats, 3)
             GlassSurface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(FtxRadius.lg),
                 fillAlpha = 0.42f,
                 contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
             ) {
-                Text(
-                    text = "Total dengar: ${formatListened(ListeningStatsLogic.totalMs(library.stats))} · ${library.stats.tracks.size} lagu",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = FtxText,
-                )
-                if (topArtist != null) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
                     Text(
-                        text = "Artis teratas: ${topArtist.first} · ${formatListened(topArtist.second)}",
+                        text = "Total dengar: ${formatListened(ListeningStatsLogic.totalMs(library.stats))}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = FtxText,
+                    )
+                    Text(
+                        text = "${library.stats.tracks.size} lagu tercatat",
                         style = MaterialTheme.typography.labelMedium,
                         color = FtxTextMuted,
                     )
+                    if (topArtists.isNotEmpty()) {
+                        Text(
+                            text = "Artis/channel teratas:",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = FtxTextMuted,
+                        )
+                        topArtists.forEachIndexed { index, entry ->
+                            Text(
+                                text = "${index + 1}. ${entry.first.replaceFirstChar { it.uppercase() }} — ${formatListened(entry.second)}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = FtxText,
+                            )
+                        }
+                    }
                 }
             }
 

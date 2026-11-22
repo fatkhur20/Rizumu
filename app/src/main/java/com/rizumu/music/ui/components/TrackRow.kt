@@ -47,49 +47,55 @@ fun TrackRow(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(FtxRadius.sm))
-            .bouncyClick(onClick = onClick, onLongClick = onLongClick)
             .padding(horizontal = 8.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (rank != null) {
-            Text(
-                text = "$rank",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = if (rank <= 3) FtxAccent else FtxTextMuted,
-                modifier = Modifier.width(22.dp),
-            )
-        }
-
-        TrackArtwork(
-            url = track.thumbnailUrl,
-            modifier = Modifier.size(50.dp),
-            shape = RoundedCornerShape(12.dp),
-            iconSize = 22.dp,
-            videoId = track.videoId,
-        )
-
-        Spacer(Modifier.width(12.dp))
-
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.Center,
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .bouncyClick(onClick = onClick, onLongClick = onLongClick),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = track.title,
-                style = MaterialTheme.typography.titleSmall,
-                color = if (isCurrent) FtxAccent else FtxText,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+            if (rank != null) {
+                Text(
+                    text = "$rank",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = if (rank <= 3) FtxAccent else FtxTextMuted,
+                    modifier = Modifier.width(22.dp),
+                )
+            }
+
+            TrackArtwork(
+                url = track.thumbnailUrl,
+                modifier = Modifier.size(50.dp),
+                shape = RoundedCornerShape(12.dp),
+                iconSize = 22.dp,
+                videoId = track.videoId,
             )
-            Spacer(Modifier.size(2.dp))
-            Text(
-                text = track.artist.ifBlank { "Unknown artist" },
-                style = MaterialTheme.typography.bodyMedium,
-                color = FtxTextMuted,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+
+            Spacer(Modifier.width(12.dp))
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = track.title,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = if (isCurrent) FtxAccent else FtxText,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(Modifier.size(2.dp))
+                Text(
+                    text = track.artist.ifBlank { "Unknown artist" },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = FtxTextMuted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
 
         if (isCurrent) {
