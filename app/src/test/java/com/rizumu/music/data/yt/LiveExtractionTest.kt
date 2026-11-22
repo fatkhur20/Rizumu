@@ -27,8 +27,6 @@ class LiveExtractionTest {
         assertTrue(audio.durationSec > 0, "duration was not extracted")
     }
 
-
-
     @Test
     fun singleWordArtistRanking() = runBlocking {
         assumeTrue("set FTX_LIVE=1 to run live network tests", System.getenv("FTX_LIVE") == "1")
@@ -37,7 +35,7 @@ class LiveExtractionTest {
         val page = YoutubeClient().search("romi", SearchFilter.ALL)
         println("items: ${page.items.size}")
         page.items.take(6).forEach { println(" - ${it.title} | ${it.artist}") }
-        assertTrue(page.items.isNotEmpty())
+        assertTrue(page.items.size > 38, "expected more than 38 results, got ${page.items.size}")
     }
 
 }

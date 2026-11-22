@@ -74,7 +74,12 @@ open class YoutubeClient(
             )
         }
 
-        page!!
+        val finalPage = page!!
+        if (filter == SearchFilter.ALL && finalPage.items.size > ALL_RESULT_LIMIT) {
+            finalPage.copy(items = finalPage.items.take(ALL_RESULT_LIMIT))
+        } else {
+            finalPage
+        }
     }
 
     private suspend fun fetch(
@@ -84,18 +89,32 @@ open class YoutubeClient(
         continuation: String? = null,
     ): Pair<List<YoutubeTrack>, String?> {
         if (filter == SearchFilter.ALL) {
-            val songs = runCatching {
-                musicSearch.search(query, MusicSearchFilter.SONGS, locale = locale)
-            }.getOrNull()
-            val videos = runCatching {
-                musicSearch.search(query, MusicSearchFilter.VIDEOS, locale = locale)
-            }.getOrNull()
-            return SearchMerger.merge(songs?.items.orEmpty(), videos?.items.orEmpty()) to null
+            val songs = fetchPages(query, MusicSearchFilter.SONGS, locale)
+            val videos = fetchPages(query, MusicSearchFilter.VIDEOS, locale)
+            return SearchMerger.merge(songs, videos) to null
         }
         val page = runCatching {
             musicSearch.search(query, filter.toMusicFilter(), continuation, locale)
         }.getOrNull()
         return (page?.items.orEmpty()) to page?.continuation
+    }
+
+    private suspend fun fetchPages(
+        query: String,
+        filter: MusicSearchFilter,
+        locale: SearchLocale,
+    ): List<YoutubeTrack> {
+        val items = mutableListOf<YoutubeTrack>()
+        var continuation: String? = null
+        for (pageIndex in 0 until ALL_PAGE_COUNT) {
+            val page = runCatching {
+                musicSearch.search(query, filter, continuation, locale)
+            }.getOrNull() ?: break
+            items.addAll(page.items)
+            continuation = page.continuation
+            if (continuation == null || items.size >= ALL_PAGE_TARGET) break
+        }
+        return items
     }
 
     private fun String.toMusicFilter(): MusicSearchFilter = when (this) {
@@ -223,6 +242,9 @@ open class YoutubeClient(
 
     companion object {
         const val MIN_RELEVANT_RESULTS = 5
+        const val ALL_PAGE_COUNT = 3
+        const val ALL_PAGE_TARGET = 60
+        const val ALL_RESULT_LIMIT = 100
         private const val RESOLVE_TTL_MS = 45 * 60 * 1000L
         private const val MAX_CACHE_ENTRIES = 80
         private const val MAX_AUDIO_BITRATE = 160_000
