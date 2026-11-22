@@ -24,7 +24,7 @@ ranking and mixed audio+video results. v0.14.0 moves the app identity to
 `com.rizumu.music` and restores the media notification with external transport controls.
 v0.14.1 uses the selected region for search, with global fallback, and keeps playback alive
 when the app is removed from recent apps. v0.14.3 focuses results on matching artists instead of channel uploads, and v0.14.4
-expands Semua search to up to 100 results.
+expands Semua search to up to 100 results; v0.14.5 adds CI for unit tests.
 
 As of v0.14.0 the package id is `com.rizumu.music`. Older `com.kyrix.ftxmusic` installs
 are a separate app and their private data is not migrated; uninstall the old app manually.
