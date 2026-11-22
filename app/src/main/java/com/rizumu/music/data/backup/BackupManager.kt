@@ -23,6 +23,7 @@ object BackupManager {
                 recent = library.recent,
                 searches = library.recentSearches,
                 playlists = PlaylistStore.snapshot(),
+                stats = library.stats,
             ),
         )
     }
@@ -34,6 +35,7 @@ object BackupManager {
             favorites = payload.favorites,
             recent = payload.recent,
             searches = payload.searches,
+            stats = payload.stats,
         )
         val createdPlaylists = PlaylistStore.mergeBackup(payload.playlists)
         RestoreSummary(

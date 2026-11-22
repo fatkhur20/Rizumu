@@ -48,6 +48,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.rizumu.music.data.local.ListeningStatsLogic
 import com.rizumu.music.data.local.UserLibrary
 import com.rizumu.music.data.local.download.DownloadEntity
 import com.rizumu.music.data.local.download.DownloadStatus
@@ -69,6 +70,7 @@ import com.rizumu.music.ui.components.PlaylistMosaic
 import com.rizumu.music.ui.components.TrackArtwork
 import com.rizumu.music.ui.components.TrackRow
 import com.rizumu.music.ui.components.SongActionSheet
+import com.rizumu.music.ui.formatListened
 import com.rizumu.music.ui.theme.FtxAccent
 import com.rizumu.music.ui.theme.FtxRadius
 import com.rizumu.music.ui.theme.FtxText
@@ -167,6 +169,29 @@ fun LibraryScreen(
                         selected = section == LibrarySection.Downloads,
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { sectionName = LibrarySection.Downloads.name },
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            val topArtist = ListeningStatsLogic.topArtists(library.stats, 1).firstOrNull()
+            GlassSurface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(FtxRadius.lg),
+                fillAlpha = 0.42f,
+                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
+            ) {
+                Text(
+                    text = "Total dengar: ${formatListened(ListeningStatsLogic.totalMs(library.stats))} · ${library.stats.tracks.size} lagu",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = FtxText,
+                )
+                if (topArtist != null) {
+                    Text(
+                        text = "Artis teratas: ${topArtist.first} · ${formatListened(topArtist.second)}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = FtxTextMuted,
                     )
                 }
             }
@@ -331,6 +356,21 @@ fun LibraryScreen(
                             isPlaying = playerState.isPlaying,
                             isBuffering = playerState.isBuffering,
                             showDuration = section == LibrarySection.History,
+                            trailing = if (section == LibrarySection.History) {
+                                {
+                                    val count = library.stats.tracks[track.videoId]?.playCount ?: 0
+                                    if (count > 0) {
+                                        Text(
+                                            text = "${count}×",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = FtxTextMuted,
+                                            modifier = Modifier.padding(start = 8.dp),
+                                        )
+                                    }
+                                }
+                            } else {
+                                null
+                            },
                             onClick = { playback.playTracks(tracks, index) },
                             onLongClick = { optionsTrack = track },
                             onMoreClick = { optionsTrack = track },

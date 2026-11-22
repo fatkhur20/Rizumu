@@ -14,3 +14,10 @@ fun formatDurationSec(seconds: Long): String {
     if (seconds <= 0L) return ""
     return formatDurationMs(seconds * 1000L)
 }
+
+fun formatListened(ms: Long): String {
+    if (ms <= 0L) return "0 m"
+    val minutes = ms / 60_000L
+    if (minutes < 60L) return "$minutes m"
+    return "${minutes / 60L} jam ${minutes % 60L} m"
+}

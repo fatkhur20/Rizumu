@@ -32,7 +32,7 @@ are a separate app and their private data is not migrated; uninstall the old app
 - R1: Rizumu identity, launcher icon, update checker, Equalizer empty state — done
 - R2: playlist mosaic/reorder, sleep timer, MediaStyle/lock screen — done
 - R3: offline downloads, playback speed, JSON backup/restore — done
-- R4: listening stats, gestures, full lyrics, Glance widgets — next
+- R4: listening stats — done v0.15.0; gestures, full lyrics, Glance widgets — next
 
 ## Stack
 

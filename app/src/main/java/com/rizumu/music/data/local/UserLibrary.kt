@@ -19,12 +19,14 @@ object UserLibrary {
         val favorites: List<YoutubeTrack> = emptyList(),
         val recent: List<YoutubeTrack> = emptyList(),
         val recentSearches: List<String> = emptyList(),
+        val stats: ListeningStats = ListeningStats(),
     )
 
     private const val PREFS_NAME = "ftx_user_library"
     private const val KEY_FAVORITES = "favorites"
     private const val KEY_RECENT = "recent"
     private const val KEY_SEARCHES = "recent_searches"
+    private const val KEY_STATS = "listening_stats"
     private const val MAX_RECENT = 30
     private const val MAX_FAVORITES = 300
     private const val MAX_SEARCHES = 10
@@ -40,6 +42,7 @@ object UserLibrary {
             favorites = readTracks(KEY_FAVORITES),
             recent = readTracks(KEY_RECENT),
             recentSearches = readStrings(KEY_SEARCHES),
+            stats = ListeningStatsJson.fromJson(prefs.getString(KEY_STATS, null)),
         )
     }
 
@@ -65,6 +68,39 @@ object UserLibrary {
             .take(MAX_RECENT)
         writeTracks(KEY_RECENT, updated)
         _state.value = _state.value.copy(recent = updated)
+    }
+
+    fun registerPlay(track: YoutubeTrack, atMs: Long = System.currentTimeMillis()) {
+        if (track.videoId.isBlank()) return
+        val updated = ListeningStatsLogic.registerPlay(
+            _state.value.stats,
+            track.videoId,
+            track.title,
+            track.artist,
+            track.thumbnailUrl,
+            atMs,
+        )
+        writeStats(updated)
+        _state.value = _state.value.copy(stats = updated)
+    }
+
+    fun commitListening(
+        track: YoutubeTrack,
+        listenedMs: Long,
+        atMs: Long = System.currentTimeMillis(),
+    ) {
+        if (track.videoId.isBlank() || listenedMs <= 0L) return
+        val updated = ListeningStatsLogic.addListening(
+            _state.value.stats,
+            track.videoId,
+            track.title,
+            track.artist,
+            track.thumbnailUrl,
+            listenedMs,
+            atMs,
+        )
+        writeStats(updated)
+        _state.value = _state.value.copy(stats = updated)
     }
 
     fun recordSearch(query: String) {
@@ -94,10 +130,15 @@ object UserLibrary {
         _state.value = Snapshot()
     }
 
+    private fun writeStats(stats: ListeningStats) {
+        prefs.edit().putString(KEY_STATS, ListeningStatsJson.toJson(stats).toString()).apply()
+    }
+
     fun mergeBackup(
         favorites: List<YoutubeTrack>,
         recent: List<YoutubeTrack>,
         searches: List<String>,
+        stats: ListeningStats = ListeningStats(),
     ) {
         val current = _state.value
         val mergedFavorites = (current.favorites + favorites)
@@ -114,13 +155,17 @@ object UserLibrary {
             .distinctBy { it.lowercase() }
             .take(MAX_SEARCHES)
 
+        val mergedStats = ListeningStatsLogic.merge(current.stats, stats)
+
         writeTracks(KEY_FAVORITES, mergedFavorites)
         writeTracks(KEY_RECENT, mergedRecent)
         writeStrings(KEY_SEARCHES, mergedSearches)
+        writeStats(mergedStats)
         _state.value = Snapshot(
             favorites = mergedFavorites,
             recent = mergedRecent,
             recentSearches = mergedSearches,
+            stats = mergedStats,
         )
     }
 

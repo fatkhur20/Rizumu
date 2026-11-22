@@ -1,5 +1,7 @@
 package com.rizumu.music.data.backup
 
+import com.rizumu.music.data.local.ListeningStats
+import com.rizumu.music.data.local.ListeningStatsJson
 import com.rizumu.music.data.local.playlist.PlaylistNames
 import com.rizumu.music.data.yt.YoutubeTrack
 import org.json.JSONArray
@@ -17,10 +19,11 @@ data class BackupPayload(
     val recent: List<YoutubeTrack>,
     val searches: List<String>,
     val playlists: List<BackupPlaylist>,
+    val stats: ListeningStats = ListeningStats(),
 )
 
 object BackupCodec {
-    const val SCHEMA_VERSION = 1
+    const val SCHEMA_VERSION = 2
     private const val MAX_TRACKS = 5_000
     private const val MAX_PLAYLISTS = 500
     private const val MAX_SEARCHES = 100
@@ -31,6 +34,7 @@ object BackupCodec {
         .put("favorites", payload.favorites.toJson())
         .put("recent", payload.recent.toJson())
         .put("searches", JSONArray(payload.searches))
+        .put("stats", ListeningStatsJson.toJson(payload.stats))
         .put("playlists", JSONArray().apply {
             payload.playlists.forEach { playlist ->
                 put(
@@ -45,13 +49,19 @@ object BackupCodec {
 
     fun decode(raw: String): BackupPayload? = runCatching {
         val root = JSONObject(raw)
-        if (root.optInt("schema", -1) != SCHEMA_VERSION) return null
+        val schema = root.optInt("schema", -1)
+        if (schema !in 1..SCHEMA_VERSION) return null
         BackupPayload(
             exportedAt = root.optLong("exportedAt", 0L),
             favorites = root.optJSONArray("favorites").toTracks(),
             recent = root.optJSONArray("recent").toTracks(),
             searches = root.optJSONArray("searches").toStrings(),
             playlists = root.optJSONArray("playlists").toPlaylists(),
+            stats = if (schema == SCHEMA_VERSION) {
+                ListeningStatsJson.fromJson(root.optJSONObject("stats")?.toString())
+            } else {
+                ListeningStats()
+            },
         )
     }.getOrNull()
 

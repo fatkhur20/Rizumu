@@ -1,5 +1,7 @@
 package com.rizumu.music.data.backup
 
+import com.rizumu.music.data.local.ListeningStats
+import com.rizumu.music.data.local.ListeningStatsLogic
 import com.rizumu.music.data.yt.YoutubeTrack
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -44,7 +46,7 @@ class BackupCodecTest {
 
     @Test
     fun rejectsUnsupportedSchema() {
-        assertNull(BackupCodec.decode("""{"schema":2,"favorites":[]}"""))
+        assertNull(BackupCodec.decode("""{"schema":3,"favorites":[]}"""))
         assertNull(BackupCodec.decode("not json"))
     }
 
@@ -70,4 +72,34 @@ class BackupCodecTest {
         assertEquals("Nama Rapi", decoded.playlists.single().name)
         assertTrue(decoded.recent.isEmpty())
     }
+
+    @Test
+    fun v2RoundTripPreservesStats() {
+        val stats = ListeningStatsLogic.addListening(
+            ListeningStatsLogic.registerPlay(ListeningStats(), "abc123", "Lagu Satu", "Artis", null, 1_000L),
+            "abc123", "Lagu Satu", "Artis", null, 7_000L, 2_000L,
+        )
+        val payload = BackupPayload(
+            exportedAt = 1L,
+            favorites = emptyList(),
+            recent = emptyList(),
+            searches = emptyList(),
+            playlists = emptyList(),
+            stats = stats,
+        )
+
+        val decoded = BackupCodec.decode(BackupCodec.encode(payload))!!
+
+        assertEquals(1, decoded.stats.tracks["abc123"]!!.playCount)
+        assertEquals(7_000L, decoded.stats.tracks["abc123"]!!.listenedMs)
+        assertEquals(stats.byArtist, decoded.stats.byArtist)
+    }
+
+    @Test
+    fun v1BackupDecodesWithEmptyStats() {
+        val decoded = BackupCodec.decode("""{"schema":1,"favorites":[]}""")!!
+
+        assertTrue(decoded.stats.tracks.isEmpty())
+    }
+
 }

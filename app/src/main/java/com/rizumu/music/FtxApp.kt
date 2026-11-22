@@ -8,6 +8,7 @@ import coil.memory.MemoryCache
 import com.rizumu.music.data.charts.ChartCache
 import com.rizumu.music.data.charts.ChartRepository
 import com.rizumu.music.data.charts.RegionStore
+import com.rizumu.music.data.local.ListeningStatsLogic
 import com.rizumu.music.data.local.UserLibrary
 import com.rizumu.music.data.local.download.DownloadStore
 import com.rizumu.music.data.local.playlist.PlaylistStore
@@ -63,21 +64,45 @@ class FtxApp : Application(), ImageLoaderFactory {
         playback = PlaybackManager(this)
 
         appScope.launch {
-            var lastMediaId: String? = null
+            var last: ListeningSample? = null
+            var pendingTrack: YoutubeTrack? = null
+            var pendingMs = 0L
             playback.state.collect { state ->
                 val id = state.mediaId ?: return@collect
-                if (id == lastMediaId) return@collect
-                lastMediaId = id
-                UserLibrary.recordPlayed(
-                    YoutubeTrack(
-                        videoId = id,
-                        title = state.title,
-                        artist = state.artist,
-                        durationSec = state.durationMs / 1000L,
-                        thumbnailUrl = state.artworkUrl,
-                    ),
+                val track = YoutubeTrack(
+                    videoId = id,
+                    title = state.title,
+                    artist = state.artist,
+                    durationSec = state.durationMs / 1000L,
+                    thumbnailUrl = state.artworkUrl,
                 )
+                val now = System.currentTimeMillis()
+                val sample = ListeningSample(id, state.positionMs, state.isPlaying)
+                val previous = last
+
+                if (previous == null || previous.id != id) {
+                    pendingTrack?.let { UserLibrary.commitListening(it, pendingMs, now) }
+                    pendingMs = 0L
+                    UserLibrary.recordPlayed(track)
+                    UserLibrary.registerPlay(track, now)
+                    pendingTrack = track
+                } else if (sample.isPlaying && sample.positionMs > previous.positionMs) {
+                    val delta = sample.positionMs - previous.positionMs
+                    if (ListeningStatsLogic.acceptableDelta(delta)) pendingMs += delta
+                }
+
+                last = sample
+                if (pendingMs >= ListeningStatsLogic.FLUSH_THRESHOLD_MS) {
+                    pendingTrack?.let { UserLibrary.commitListening(it, pendingMs, now) }
+                    pendingMs = 0L
+                }
             }
         }
     }
 }
+
+private data class ListeningSample(
+    val id: String,
+    val positionMs: Long,
+    val isPlaying: Boolean,
+)
