@@ -154,12 +154,13 @@ fun SearchScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .imePadding()
-            .padding(horizontal = 16.dp),
-    ) {
+    Box(Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .imePadding()
+                .padding(horizontal = 16.dp),
+        ) {
         Spacer(Modifier.height(10.dp))
         Text(
             text = "Cari",
@@ -341,13 +342,14 @@ fun SearchScreen(
         }
     }
 
-    optionsTrack?.let { track ->
-        SongActionSheet(
-            playback = playback,
-            track = track,
-            onDismiss = { optionsTrack = null },
-            onOpenArtist = { artist -> viewModel.submitQuery(artist) },
-        )
+        optionsTrack?.let { track ->
+            SongActionSheet(
+                playback = playback,
+                track = track,
+                onDismiss = { optionsTrack = null },
+                onOpenArtist = { artist -> viewModel.submitQuery(artist) },
+            )
+        }
     }
 }
 

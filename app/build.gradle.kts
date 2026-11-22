@@ -26,8 +26,8 @@ android {
         applicationId = "com.rizumu.music"
         minSdk = 26
         targetSdk = 34
-        versionCode = 42
-        versionName = "0.15.1"
+        versionCode = 43
+        versionName = "0.15.2"
 
         buildConfigField("String", "GITHUB_OWNER", "\"$githubOwner\"")
         buildConfigField("String", "GITHUB_REPO", "\"$githubRepo\"")

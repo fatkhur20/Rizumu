@@ -109,7 +109,8 @@ fun LibraryScreen(
         LibrarySection.Playlists, LibrarySection.Downloads -> emptyList()
     }
 
-    Column(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize()) {
         Column(Modifier.padding(horizontal = 18.dp)) {
             Spacer(Modifier.height(10.dp))
             Text(
@@ -398,20 +399,21 @@ fun LibraryScreen(
         }
     }
 
-    optionsTrack?.let { track ->
-        SongActionSheet(
-            playback = playback,
-            track = track,
-            onDismiss = { optionsTrack = null },
-            onOpenArtist = { artist -> onOpenSearch(artist) },
-        )
-    }
+        optionsTrack?.let { track ->
+            SongActionSheet(
+                playback = playback,
+                track = track,
+                onDismiss = { optionsTrack = null },
+                onOpenArtist = { artist -> onOpenSearch(artist) },
+            )
+        }
 
-    if (showCreateDialog) {
-        CreatePlaylistDialog(
-            onDismiss = { showCreateDialog = false },
-            onCreate = { name -> PlaylistStore.create(name) },
-        )
+        if (showCreateDialog) {
+            CreatePlaylistDialog(
+                onDismiss = { showCreateDialog = false },
+                onCreate = { name -> PlaylistStore.create(name) },
+            )
+        }
     }
 }
 
